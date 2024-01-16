@@ -1,7 +1,7 @@
-#' readIn
+#' .readIn
 #'
 #' @return
-readIn = function () {
+.readIn = function () {
 
   is_link_ = F
 
@@ -23,25 +23,29 @@ readIn = function () {
 
 }
 
-#' saveIn
+#' .saveIn
 #'
 #' @param img_
 #' @param name_
 #' @param path_
 #'
 #' @return
-saveIn = function (img_, name_ = NULL, path_ = options("picTmpDir")[[1]]) {
+.saveIn = function (img_, name_ = NULL, path_ = options("picTmpDir")[[1]]) {
 
   suffix_ = tolower(unique(magick::image_info(img_)$format))
   if (suffix_ == "webp") suffix_ = "gif"
 
-  path_ = normalizePath(path_, winslash = "\\", mustWork = F)
-
   if (is.null(name_)) {
+    path_ = normalizePath(path_, winslash = "\\", mustWork = F)
     file_ = normalizePath(tempfile(tmpdir = path_), winslash = "/", mustWork = F)
-  } else {
+  } else if (!getOption("useRelativePath") | is.na(getOption("useRelativePath"))) {
+    path_ = normalizePath(path_, winslash = "\\", mustWork = F)
     file_ = normalizePath(file.path(path_, name_), winslash = "/", mustWork = F)
+  } else {
+    file_ = file.path(path_, name_)
   }
+
+  if (is.na(getOption("useRelativePath"))) cat("Relative Path is NA, please reset it !")
 
   file_ = paste0(file_, ".", suffix_)
   magick::image_write(img_, file_, suffix_)
@@ -50,81 +54,91 @@ saveIn = function (img_, name_ = NULL, path_ = options("picTmpDir")[[1]]) {
 
 }
 
-#' insertor
+#' .insertor
 #'
-#' @param link_
+#' @param file_
 #'
 #' @return
-insertor = function (link_) {
+.insertor = function (file_) {
 
   context_ = rstudioapi::getSourceEditorContext()
-  text_ = paste0("```{r}\nknitr::include_graphics('", link_, "')\n```")
+  text_ = paste0("```{r}\nknitr::include_graphics('", file_, "')\n```")
 
   rstudioapi::insertText(text = text_, id = context_$id)
 }
 
-#' autoMode
+#' .autoMode
 #'
 #' @return
-autoMode = function () {
+.autoMode = function () {
 
-  img_  = readIn()
-  file_ = saveIn(img_)
+  img_  = .readIn()
+  file_ = .saveIn(img_)
 
-  insertor(file_)
+  .insertor(file_)
 
 }
 
-#' manuMode
+#' .manuMode
 #'
 #' @return
-manuMode = function () {
+.manuMode = function () {
 
-  img_  = readIn()
+  img_  = .readIn()
 
+  cat("Esc to exit\n")
+  useRelativePath_ = as.logical(readline("useRelativePath(T/F): "))
   path_ = readline("Set a path: ")
 
   options(designated = path_)
+  options(useRelativePath = useRelativePath_)
 
   name_ = readline("Set a name: ")
 
-  file_ = saveIn(img_, name_, path_)
+  file_ = .saveIn(img_, name_, path_)
 
-  insertor(file_)
+  .insertor(file_)
 
 
 }
 
-#' semiMode
+#' .semiMode
 #'
 #' @return
-semiMode = function () {
+.semiMode = function () {
 
-  img_  = readIn()
+  img_  = .readIn()
 
-  path_ = options("designated")[[1]]
+  path_ = getOption("designated")
 
-  if (is.null(path_)) {
+  if (is.null(path_) | is.na(path_) | nchar(path_) == 0) {
     path_ = readline("Set a path: ")
     options(designated = path_)
   }
 
+  useRelativePath_ = getOption("useRelativePath")
+
+  if (is.null(useRelativePath_) | is.na(useRelativePath_)) {
+    useRelativePath_ = as.logical(readline("useRelativePath(T/F): "))
+    options(useRelativePath = useRelativePath_)
+  }
+
   name_ = readline("Set a name: ")
 
-  file_ = saveIn(img_, name_, path_)
+  file_ = .saveIn(img_, name_, path_)
 
-  insertor(file_)
+  .insertor(file_)
 
 }
 
-#' textMode
+#' .textMode
 #'
 #' @return
-textMode = function () {
+.textMode = function () {
 
   file_ = suppressWarnings({link_ = read.table("clipboard")[1, 1]})
 
-  insertor(file_)
+  .insertor(file_)
 
 }
 
@@ -137,6 +151,8 @@ textMode = function () {
 setPicTmpDir = function (path_) {
 
   options(picTmpDir = path_)
+
+  if (!file.exists("~/.Rprofile")) file.create("~/.Rprofile")
 
   Rprofile = suppressWarnings({readLines("~/.Rprofile")})
 
@@ -162,7 +178,7 @@ kaca = function (mode_ = options("kacaMode")[[1]]) {
     mode_ = "auto"
   }
 
-  eval(parse(text = paste0("kaca:::", mode_, "Mode()")))
+  eval(parse(text = paste0("kaca:::.", mode_, "Mode()")))
   invisible()
 
 }
@@ -194,6 +210,9 @@ kada = function () {
   cat(paste0(modes_, collapse = paste0(rep("-", (getOption("width") - 16) %/% 3), collapse = "")), "\n")
   cat("\n")
   cat("Currently:", current_, "\nFollowing:", follow_, "\n", sep = "")
+  cat("useRelativePath:", getOption("useRelativePath"), "\n")
+  cat("Designated Dir:", getOption("designated"), "\n")
+  cat("picTmpDir:", getOption("picTmpDir"), "\n")
 
 }
 

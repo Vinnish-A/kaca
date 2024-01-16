@@ -1,2 +1,0 @@
-
-edit_snippets <- function(){<br>  rstudioapi::callFun("sendToConsole", "file.edit(paste0(path.expand('~'),'/.R/snippets/r.snippets'))")<br>}
