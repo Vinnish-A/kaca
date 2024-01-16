@@ -1,0 +1,9 @@
+Name: Insert pics from clipboard
+Description: Inserts Pics in Markdown
+Binding: kaca
+Interactive: true
+
+Name: Switch modes
+Description: Switch modes to insert pic
+Binding: kada
+Interactive: false
