@@ -1,6 +1,0 @@
-kaca::setPicTmpDir("F:/0Local/杂项/")
-
-
-edit_snippets <- function(){rstudioapi::callFun("sendToConsole", "file.edit(paste0(path.expand('~'),'/.R/snippets/r.snippets'))")}
-open_server_guide <- function() {  rstudioapi::viewer("https://ifar-connect.hsl.harvard.edu/using_rstudio_server/")}
-open_server_guide()
