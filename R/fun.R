@@ -23,6 +23,35 @@
 
 }
 
+#' .checkpath
+#'
+#' @param path_
+#'
+#' @return
+.checkpath = function(path_) {
+
+  tryCatch(
+    expr  = {normalizePath(path_, mustWork = T)},
+    error = function(e) {stop("Please provide a valid path!")}
+  )
+
+}
+
+#' .checkname_
+#'
+#' @param name_
+#'
+#' @return
+.checkname_ = function(name_) {
+
+  nameFixed_ = trimws(gsub('\"|\'|“|”', '', name_))
+
+  if (!nameFixed_ == name_) cat("Autocorrect the input as", nameFixed_, "\n")
+
+  nameFixed_
+
+}
+
 #' .saveIn
 #'
 #' @param img_
@@ -37,15 +66,20 @@
 
   if (is.null(name_)) {
     path_ = normalizePath(path_, winslash = "\\", mustWork = F)
+    .checkpath(path_)
     file_ = normalizePath(tempfile(tmpdir = path_), winslash = "/", mustWork = F)
   } else if (!getOption("useRelativePath") | is.na(getOption("useRelativePath"))) {
     path_ = normalizePath(path_, winslash = "\\", mustWork = F)
+    .checkpath(path_)
     file_ = normalizePath(file.path(path_, name_), winslash = "/", mustWork = F)
   } else {
+    .checkpath(path_)
     file_ = file.path(path_, name_)
   }
 
-  if (is.na(getOption("useRelativePath"))) cat("Relative Path is NA, please reset it !")
+  if (!is.null(getOption("useRelativePath")) && is.na(getOption("useRelativePath"))) {
+    cat("Relative Path is NA, please reset it !")
+  }
 
   file_ = paste0(file_, ".", suffix_)
   magick::image_write(img_, file_, suffix_)
@@ -87,13 +121,14 @@
   img_  = .readIn()
 
   cat("Esc to exit\n")
-  useRelativePath_ = as.logical(readline("useRelativePath(T/F): "))
+  useRelativePath_ = as.logical(readline("useRelativePath (T/F): "))
   path_ = readline("Set a path: ")
+  .checkpath(path_)
 
-  options(designated = path_)
   options(useRelativePath = useRelativePath_)
+  options(designated = path_)
 
-  name_ = readline("Set a name: ")
+  name_ = .checkname_(readline("Set a name: "))
 
   file_ = .saveIn(img_, name_, path_)
 
@@ -113,6 +148,7 @@
 
   if (is.null(path_) | is.na(path_) | nchar(path_) == 0) {
     path_ = readline("Set a path: ")
+    .checkpath(path_)
     options(designated = path_)
   }
 
@@ -123,7 +159,7 @@
     options(useRelativePath = useRelativePath_)
   }
 
-  name_ = readline("Set a name: ")
+  name_ = .checkname_(readline("Set a name: "))
 
   file_ = .saveIn(img_, name_, path_)
 
@@ -150,6 +186,7 @@
 #' @export
 setPicTmpDir = function (path_) {
 
+  .checkpath(path_)
   options(picTmpDir = path_)
 
   if (!file.exists("~/.Rprofile")) file.create("~/.Rprofile")
@@ -198,18 +235,18 @@ kada = function () {
     mode_ = "auto"
   }
 
-  current_ = modes_[which(modes_ == mode_) %% 4 + 1]
-  follow_ = modes_[which(modes_ == current_) %% 4 + 1]
+  currently_ = modes_[which(modes_ == mode_) %% 4 + 1]
+  following_ = modes_[which(modes_ == currently_) %% 4 + 1]
 
-  options(kacaMode = current_)
+  options(kacaMode = currently_)
 
-  pointer_ = rep("    ", 4); pointer_[which(modes_ == current_)] = "--->"
+  pointer_ = rep("    ", 4); pointer_[which(modes_ == currently_)] = "--->"
 
   cat(paste0(c(rep(" ", (getOption("width") - 5) %/% 2), "KaDa!"), collapse = ""), "\n")
   cat(paste0(pointer_, collapse = paste0(rep(" ", (getOption("width") - 16) %/% 3), collapse = "")), "\n")
   cat(paste0(modes_, collapse = paste0(rep("-", (getOption("width") - 16) %/% 3), collapse = "")), "\n")
   cat("\n")
-  cat("Currently:", current_, "\nFollowing:", follow_, "\n", sep = "")
+  cat("Currently:", currently_, "\nFollowing:", following_, "\n", sep = "")
   cat("useRelativePath:", getOption("useRelativePath"), "\n")
   cat("Designated Dir:", getOption("designated"), "\n")
   cat("picTmpDir:", getOption("picTmpDir"), "\n")
