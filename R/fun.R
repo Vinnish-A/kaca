@@ -276,7 +276,7 @@ setPicTmpDir = function (path_) {
 #' @export
 kaca = function () {
 
-  if (is.null(mode_)) {
+  if (is.null(getOption('kacaMode'))) {
     options(kacaMode = "auto")
   }
 
