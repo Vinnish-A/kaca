@@ -72,7 +72,7 @@ insert_pic = function() {
                   column(width = 6, align = 'center', textInput('path', label = 'dirname', value = makeName()[[1]])),
                   column(width = 6, align = 'center', textInput('filename', label = 'filename', value = makeName()[[2]])),
                   column(width = 6, align = 'center', textInput('figCap', label = 'fig.cap', placeholder = 'NULL')),
-                  column(width = 6, align = 'center', selectizeInput('figAlign', label = 'fig.align', choices = c('default', 'left', 'right', 'center'), selected = 'center'))
+                  column(width = 6, align = 'center', selectizeInput('figAlign', label = 'fig.align', choices = c('default', 'left', 'right', 'center'), selected = 'default'))
                 ),
                 div(
                   id = 'insertBox',
@@ -95,7 +95,8 @@ insert_pic = function() {
               )
             ),
             tags$script(
-              HTML(paste(readLines('R/clipboard.js'), collapse = '\n'))
+              HTML(paste(readLines(system.file('extdata', 'clipboard.js', package = 'kaca')), collapse = '\n'))
+              # HTML(paste(readLines('R/clipboard.js'), collapse = '\n'))
             )
           )
 
@@ -126,7 +127,17 @@ insert_pic = function() {
     })
 
     observe({
-      shinyjs::toggleState(id ="saveButton", condition = !is.null(input$imageInfos) & input$filename != makeName()[[2]] & getOption('kacaMode') == 'semi')
+      imageExists_ = length(input$imageInfos) > 0
+      filenameWhenSemi_ = input$filename != makeName()[[2]] | getOption('kacaMode') != 'semi'
+      if (!is.null(input$urlBehavior) ) {
+        filenameWhenRaw_ = input$urlBehavior == 'Insert raw url'
+      } else {
+        filenameWhenRaw_ = F
+      }
+      shinyjs::toggleState(
+        id ="saveButton",
+        condition = imageExists_ & (filenameWhenSemi_ | filenameWhenRaw_)
+      )
     })
 
     observeEvent(
@@ -185,7 +196,7 @@ insert_pic = function() {
     observeEvent(
       input$saveButton,
       if (input$placeholder == 1) {
-        file_ = normalizePath(file.path(input$path, paste0(input$filename, input$extension)), mustWork = F)
+        file_ = assemble(input$path, input$filename, input$imageInfos$extension)
 
         if (file.exists(file_)) {
 
@@ -216,7 +227,7 @@ insert_pic = function() {
 
         } else {
 
-          file_ = normalizePath(file.path(input$path, paste0(input$filename, input$extension)), mustWork = F)
+          file_ = assemble(input$path, input$filename, input$imageInfos$extension)
           if (file.exists(file_)) {
             confirmSweetAlert(
               session = session,
@@ -228,6 +239,7 @@ insert_pic = function() {
               danger_mode = F
             )
           } else {
+            file_ = assemble(input$path, input$filename, input$imageInfos$extension)
             tryCatch(download.file(input$src, destfile = file_, mode='wb'), error = \(e) stop('Fail to download...'))
           }
 
@@ -244,6 +256,7 @@ insert_pic = function() {
       input$conflict,
       if (input$conflict) {
 
+        file_ = assemble(input$path, input$filename, input$imageInfos$extension)
         if (input$placeholder == 1) {
           .insertor(file_, input$insertStyle, input$figCap, input$figAlign)
           makeEdit(input$path, 'semi')

@@ -3,64 +3,78 @@ kaca: RStudio Addin to Insert Pictures and Links from clipborad
 
 # kaca
 
-In short, this package mainly contains two functions, `kaca`(sound of
-the camera shutter) and `kada`(sound of the camera rotation wheel),
-`kaca` is used to capture and insert the picture or link in the
-clipboard, and `kada` is used to switch the shutter mode.
+In short, `kaca` is a shiny application which captures image or link,
+saves it to designated dir and inserts a url. For it is based on shiny
+and JavaScript, basically can be used on RStudio in any operating system
+(including RStudio Server).
 
 ## Usage
 
-kaca is a Rstudio addin, it is best to configure the shortcut keys for
-`kaca` and `kada.` Here I set the shortcut keys for `kaca` is
-`Ctrl+Shift+Alt+C`, and for `kada` it is `Ctrl+Shift+Alt+D`.
+First, you need to set a shortcut key (if you don’t want to run
+`kaca::kaca()` in the console every time), I highly recommend
+`Ctrl + Alt + C` or `Ctrl + B` (because these two are not commonly used
+by other softwares).You can search for `Insert pics from clipboard` in
+the `modify keyboard shortcuts` of RStudio to find `kaca`.
 
-The first time we use it, we need to set the default storage folder via
-`setPicTmpDir`. This function will set the default path via `options()`
-and write the default path to `.Rprofile`.
+Then, assuming there is an image on your clipboard, that’s great! You
+just need to press the shortcut key you set earlier to save the image
+and insert a quote. Remember to give your picture a meaningful name.
 
-``` r
-setPicTmpDir("Your Temp Dir")
-```
-
-Then, we can take a screenshot, record a screen, or copy an image, or
-copy a link to an image. With just one `kaca`, the image can be
-automatically saved and a reference could be inserted into the document
-you are editing.
+Because the method used here is image encoding and decoding to obtain
+and save images, it can’t save animated images on the clipboard. This
+issue could be partially resolved by using the method of copying links
+below.
 
 ``` r
-knitr::include_graphics('utils/images/screenshot1.gif')
+knitr::include_graphics('utils/images/pre1.gif')
 ```
 
-<img src="utils/images/screenshot1.gif" width="100%" />
+<div class="figure">
 
-For GIFs, whether gif or webp, copying the image directly is always
-unsatisfactory, and copying a web or local link is a good idea.
+<img src="utils/images/pre1.gif" alt="Copy an image!" width="100%" />
+<p class="caption">
+Copy an image!
+</p>
+
+</div>
+
+If there is an image link on your clipboard, you can either directly
+insert the original link or download it to your local device before
+inserting a new link. The latter option won’t take much effort.
 
 ``` r
-knitr::include_graphics('utils/images/screenshot2.gif')
+knitr::include_graphics('utils/images/pre2.gif')
 ```
 
-<img src="utils/images/screenshot2.gif" width="100%" />
+<div class="figure">
 
-For those who are strict with their work environment, we also provide
-four modes for managing pictures.
+<img src="utils/images/pre2.gif" alt="Copy a link and insert raw." width="100%" />
+<p class="caption">
+Copy a link and insert raw.
+</p>
 
-- `AutoMode`: the automatic mode, images are stored in the default path
-  with randomly generated file names
-- `ManuMode`: the manual mode. You need to manually provide the file
-  name and path
-- `SemiMode`: the semi-automatic, which remembers the path provided in
-  the last manual mode, but a file name is still needed
-- `TextMode`: Insert a link, if we know the link of an image, it is not
-  necessary to download it
+</div>
+
+Be sure to remember that any images saved locally need to have a
+meaningful name, unless you set `options('kacaMode' = 'auto')`. You can
+also set `options('kacaMode' = 'semi')` to revert back to the initial.
+But I believe this setting is generally not needed.
+
+``` r
+knitr::include_graphics('utils/images/pre3.gif')
+```
+
+<div class="figure">
+
+<img src="utils/images/pre3.gif" alt="Copy a link, download and insert it." width="100%" />
+<p class="caption">
+Copy a link, download and insert it.
+</p>
+
+</div>
 
 ## Plan
 
-Currently `kaca` only supports windows platforms and does bad for
-relative paths support In the future, I will study python’s [PIL
-project](https://github.com/python-pillow/Pillow) and explore how to
-support multiple platforms.
-
-It’s just a toy for now, and the function is not complete. In the near
-future, I’ll add a small dashboard using `shiny` for more handy options
-in both `ManuMode` and `SemiMode.`
+Next, `kaca` will try to add support for image hosting services,
+allowing images or links on the clipboard to be uploaded directly to the
+specific image hosting service link.

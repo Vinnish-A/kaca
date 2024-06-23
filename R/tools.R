@@ -10,6 +10,23 @@
 
 }
 
+#' Make relative path
+#'
+#' @return relative path
+#'
+#' @keywords internal
+assemble = function(dir_, filename_, ext_, relative_ = T) {
+
+  file_ = normalizePath(file.path(dir_, paste0(filename_, '.', ext_)), mustWork = F)
+
+  if (relative_) {
+    file_ = R.utils::getRelativePath(file_, getwd())
+  }
+
+  return(file_)
+
+}
+
 #' Make names by rules
 #'
 #' @return names by rules
@@ -60,31 +77,42 @@ makeEdit = function(designated_, kacaMode_) {
     rprofile_ = '~/.Rprofile'
   }
 
+  if (!file.exists('~/.Rprofile')) file.create('~/.Rprofile')
   if (!file.exists(rprofile_)) file.create(rprofile_)
 
-  file_ = readLines(rprofile_)
+  file_ = suppressWarnings(readLines(rprofile_))
 
   # browser()
   i_ = 1
   if (!T %in% grepl('created by kaca automatically', file_)) {
-    file_ = c(
-      file_,
-      paste0("option('designated' = '", designated_, "') # created by kaca automatically"),
-      paste0("option('kacaMode' = '", kacaMode_, "') # created by kaca automatically")
-    )
+    if (rprofile_ == '.Rprofile') {
+      file_ = c(
+        file_,
+        'source("~/.Rprofile")',
+        paste0("options('designated' = '", designated_, "') # created by kaca automatically"),
+        paste0("options('kacaMode' = '", kacaMode_, "') # created by kaca automatically")
+      )
+    } else {
+      file_ = c(
+        file_,
+        paste0("options('designated' = '", designated_, "') # created by kaca automatically"),
+        paste0("options('kacaMode' = '", kacaMode_, "') # created by kaca automatically")
+      )
+    }
+
     i_ = i_ + 1
   }
-  if (file_[which(grepl('kaca', file_) & grepl('designated', file_))] != paste0("option('designated' = '", designated_, "') # created by kaca automatically")) {
-    file_[which(grepl('kaca', file_) & grepl('designated', file_))] = paste0("option('designated' = '", designated_, "') # created by kaca automatically")
+  if (file_[which(grepl('kaca', file_) & grepl('designated', file_))] != paste0("options('designated' = '", designated_, "') # created by kaca automatically")) {
+    file_[which(grepl('kaca', file_) & grepl('designated', file_))] = paste0("options('designated' = '", designated_, "') # created by kaca automatically")
     i_ = i_ + 1
   }
-  if (file_[which(grepl('kaca', file_) & grepl('kacaMode', file_))] != paste0("option('kacaMode' = '", kacaMode_, "') # created by kaca automatically")) {
-    file_[which(grepl('kaca', file_) & grepl('kacaMode', file_))] = paste0("option('kacaMode' = '", kacaMode_, "') # created by kaca automatically")
+  if (file_[which(grepl('kaca', file_) & grepl('kacaMode', file_))] != paste0("options('kacaMode' = '", kacaMode_, "') # created by kaca automatically")) {
+    file_[which(grepl('kaca', file_) & grepl('kacaMode', file_))] = paste0("options('kacaMode' = '", kacaMode_, "') # created by kaca automatically")
     i_ = i_ + 1
   }
 
   if (i_ > 1) {
-    writeLines(file_, rprofile_)
+    suppressWarnings(writeLines(file_, rprofile_))
   }
 
 }

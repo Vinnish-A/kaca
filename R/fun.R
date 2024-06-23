@@ -99,7 +99,7 @@
     context_ = rstudioapi::getSourceEditorContext()
 
     head_ = "```{r"
-    body_ = sprintf('}\nknitr::include_graphics(%s)\n```\n\n', file_)
+    body_ = sprintf("}\nknitr::include_graphics('%s')\n```\n\n", file_)
 
     if (!is.null(fig.cap_) & !is.null(fig.align_)) {
       head_ = paste0(head_, sprintf(' fig.cap=r"[%s]"', fig.cap_), sprintf(', fig.align="%s"', fig.align_))
