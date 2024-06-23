@@ -4,6 +4,8 @@
   options('kacaUsage' = 'ui')
   if (is.null(getOption('kacaMode'))) {
     options('kacaMode' = 'semi')
+  } else if (getOption('kacaMode') %in% c('manu', 'text')) {
+    options('kacaMode' = 'semi')
   }
 
 }
