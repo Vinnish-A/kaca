@@ -93,12 +93,61 @@
 #' @param file_
 #'
 #' @return
-.insertor = function (file_) {
+.insertor = function (file_, style_ = 'knitr', fig.cap_ = NULL, fig.align_ = NULL) {
 
-  context_ = rstudioapi::getSourceEditorContext()
-  text_ = paste0("```{r}\nknitr::include_graphics('", file_, "')\n```")
+  if (style_ == 'knitr') {
+    context_ = rstudioapi::getSourceEditorContext()
+
+    head_ = "```{r"
+    body_ = sprintf('}\nknitr::include_graphics(%s)\n```\n\n', file_)
+
+    if (!is.null(fig.cap_) & !is.null(fig.align_)) {
+      head_ = paste0(head_, sprintf(' fig.cap=r"[%s]"', fig.cap_), sprintf(', fig.align="%s"', fig.align_))
+      fig.cap_ = NULL
+      fig.align_ = NULL
+    }
+
+    if (!is.null(fig.cap_)) {
+      head_ = paste(head_, sprintf('fig.cap=r"[%s]"', fig.cap_))
+    }
+
+    if (!is.null(fig.align_)) {
+      head_ = paste(head_, sprintf('fig.align="%s"', fig.align_))
+    }
+
+    text_ = paste0(head_, body_)
+
+  } else {
+    context_ = rstudioapi::getSourceEditorContext()
+
+    if (is.null(fig.align_) & is.null(fig.align_)) {
+
+      text_ = paste0(sprintf(r"[![](%s)]", file_), '\n\n')
+
+    } else {
+
+      if (is.null(fig.align_)) {
+        head_ = '<div class="figure">'
+      } else {
+        head_ = sprintf('<div class="figure" style="text-align: %s">', fig.align_)
+      }
+
+      if (is.null(fig.cap_)) {
+        cap_ = NULL
+      } else {
+        cap_ = sprintf('<p class="caption">%s</p>', fig.cap_)
+      }
+
+      body_ = sprintf('<img src="%s"/>', file_)
+      tail_ = '</div>\n\n'
+
+      text_ = paste(head_, body_, cap_, tail_, sep = '\n')
+
+    }
+  }
 
   rstudioapi::insertText(text = text_, id = context_$id)
+
 }
 
 #' .autoMode
@@ -202,37 +251,64 @@ setPicTmpDir = function (path_) {
 
 }
 
-#' kaca
+#' Invoke RStudio add-in to save and insert pictures in clipboard
 #'
-#' @param mode_
+#' @details The new version of kaca is based on shiny and enables a UI interface.
+#' The command-line version will be removed in the next update.
+#' The original user operation modes only include {auto} mode and {semi} mode,
+#' with {semi} being the default mode.
 #'
-#' @return
+#' After enabling the Shiny application,
+#' press \code{CTRL + V} or any other paste key within the interface,
+#' and the application will automatically retrieve images or image links from the clipboard.
+#' When there is an image link on the clipboard, you can choose to insert the original link or download the image to local before inserting it.
+#'
+#' Note that kaca encourages you to give a meaningful name to the image you want to save,
+#' so when using modes other than \{auto}, you cannot directly save the image.
+#'
+#' @return Inserts selected markdown/knitr link at current location and saves it in designated path.
+#'
+#' @examples
+#' \dontrun{
+#'  kaca()
+#' }
+#'
 #' @export
-kaca = function (mode_ = options("kacaMode")[[1]]) {
+kaca = function () {
 
   if (is.null(mode_)) {
     options(kacaMode = "auto")
-    mode_ = "auto"
   }
 
-  eval(parse(text = paste0("kaca:::.", mode_, "Mode()")))
-  invisible()
+  if (is.null(getOption('kacaUsage'))) {
+    options(kacaUsage = "ui")
+  }
+
+  if (getOption('kacaUsage') == 'cmd') {
+
+    if (Sys.info()[[1]] != "Windows") warning("Usage 'cmd' only works on Windows.")
+
+    eval(parse(text = paste0("kaca:::.", getOption("kacaMode"), "Mode()")))
+    invisible()
+
+  } else if (getOption('kacaUsage') == 'ui') {
+
+    insert_pic()
+
+  }
 
 }
 
 #' kada
 #'
-#' @param mode_
-#'
-#' @return
 #' @export
 kada = function () {
 
   modes_ = c("auto", "manu", "semi", "text")
   mode_  = options("kacaMode")[[1]]
   if (is.null(mode_)) {
-    options(kacaMode = "auto")
-    mode_ = "auto"
+    options(kacaMode = "semi")
+    mode_ = "semi"
   }
 
   currently_ = modes_[which(modes_ == mode_) %% 4 + 1]
