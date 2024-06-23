@@ -8,8 +8,8 @@
 #'  kaca()
 #' }
 #'
-#' @import miniUI
 #' @import shiny
+#' @import miniUI
 #' @import shinyjs
 #' @import htmltools
 #' @importFrom shinyWidgets confirmSweetAlert
