@@ -73,8 +73,25 @@ Copy a link, download and insert it.
 
 </div>
 
+## News!
+
+Now we have image hosting service in R. including `github` and `gitee`!
+You can use `Github Action` to reach other services for now.
+
+Use
+`edit_environ_github`/`edit_environ_gitee`/`edit_environ_githubAction`
+to configure environs. Note that in `githubAction` we do nothing but to
+replace the raw url to provided one, like:
+
+![](utils/images/20240726_conifg.png)
+
+In which, you should designate `HOST_SERVICE` as github or gitee.
+
+The tutorial on connecting Github Action to Tencent Cloud can be found
+[here](https://blog.csdn.net/Tencent_COS/article/details/102714201), and
+I have conducted it, which is very convenient for writing Wexin
+articles.
+
 ## Plan
 
-Next, `kaca` will try to add support for image hosting services,
-allowing images or links on the clipboard to be uploaded directly to the
-specific image hosting service link.
+Add built-in support for other image hosting service.

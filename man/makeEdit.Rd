@@ -4,7 +4,7 @@
 \alias{makeEdit}
 \title{Check editions}
 \usage{
-makeEdit(designated_, kacaMode_)
+makeEdit(designated_, kacaMode_, insertStyle_, upload_)
 }
 \value{
 return null but check options

@@ -144,6 +144,9 @@ function CLIPBOARD_CLASS(canvas_id, autoresize) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    var currentCanvasId = null;
+
     const saveButton = document.getElementById('saveButton');
     saveButton.addEventListener('click', function () {
         const canvas = document.getElementById('my_canvas');
@@ -162,4 +165,6 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.removeChild(downloadLink);
         */
     });
+
+
 });

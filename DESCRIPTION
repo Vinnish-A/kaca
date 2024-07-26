@@ -12,3 +12,12 @@ License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
+Imports:
+  base64enc, 
+  shiny, 
+  shinyjs, 
+  httr, 
+  htmltools, 
+  miniUI, 
+  jsonlite, 
+  shinyWidgets
