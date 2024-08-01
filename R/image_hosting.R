@@ -137,7 +137,7 @@ upload2github = function(filename_, content_, src_ = F) {
 #' @keywords internal
 .sentenceMaker = function(terms_) {
 
-  notes_ = paste0('# Github Environ | ', 'Created by kaca automatically')
+  notes_ = '# Github Environ | Remember to delete these comments | Created by kaca automatically'
   terms_ = terms_[sapply(terms_, \(term__) length(Sys.getenv(term__)) == 1)]
 
   if (length(terms_) > 0) {
